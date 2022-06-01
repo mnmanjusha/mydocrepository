@@ -1,0 +1,6 @@
+DNS - manjusha.westindia.cloudapp.azure.com
+
+User Name – azureuser
+
+Password – Password@1234
+
