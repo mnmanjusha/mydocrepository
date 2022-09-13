@@ -1,0 +1,223 @@
+index.js
+------------
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+//import reportWebVitals from './reportWebVitals';
+import { BrowserRouter } from 'react-router-dom';
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+<>
+ <BrowserRouter>
+  <App />
+  </BrowserRouter>
+  </>
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+//reportWebVitals();
+
+--------------------------------------------------------
+App.js
+import './App.css';
+import { Routes, Route, Link } from 'react-router-dom';
+//import About from './components/About';
+import AddProducts from './components/AddProducts';
+import ListProducts from './components/ListProducts';
+
+
+function App() {
+  return (
+    <>
+    <ul>
+      
+    <li><Link to="/AddProduct">Add Products</Link></li>
+      <li><Link to="/ListProducts">List Products</Link></li>
+      
+    </ul>		
+    <Routes>
+          <Route path='/AddProduct' element={<AddProducts/>} />
+          <Route path='/ListProducts' element={<ListProducts/>} />
+    </Routes>	
+    </>
+  );
+    }
+export default App;
+
+-----------------------------------------------------
+
+AddProducts.js
+
+import React, { useState } from "react"
+import ProductService from "../services/ProductService";
+
+class AddProducts extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.onChangeProductName = this.onChangeProductName.bind(this);
+        this.onChangeProductStock = this.onChangeProductStock.bind(this);
+        this.onChangeProductPrice = this.onChangeProductPrice.bind(this);
+        this.onSubmit = this.onSubmit.bind(this);
+        this.state={ result : ''}
+        this.state = {
+            name: '',
+            stock: '',
+            price: ''
+        }
+    }
+
+    onChangeProductName(e) {
+        this.setState({
+            name: e.target.value
+        });
+        
+    }
+
+    onChangeProductStock(e) {
+        this.setState({
+            stock: e.target.value
+        });
+    }
+
+    onChangeProductPrice(e) {
+        this.setState({
+            price: e.target.value
+        });
+    }
+
+
+  onSubmit=event=>{
+    alert("submit invoked");
+    
+    const product = {
+        name: this.state.name,
+        stock: this.state.stock,
+        price: this.state.price
+    };
+    alert("sending add request");
+   
+    
+    ProductService.addProduct(product).then((response)=>{
+         this.setState({ result : response.data});  
+        alert("Product Added Successfully");
+      });
+    this.setState({
+        name: '',
+        port: ''
+    });
+    event.preventDefault();
+    }
+
+    render(){
+    return(
+        <div>
+            <form name="form1"  onSubmit={ this.onSubmit}>
+
+                
+                Product Name : <input type="text" name="productName" onChange={ this.onChangeProductName } value={this.state.name}></input><br></br>
+                Product Stock : <input type="text" name="productStock" onChange={ this.onChangeProductStock } value={this.state.stock}></input><br></br>
+                Product Price : <input type="text" name="productPrice" onChange={ this.onChangeProductPrice } value={this.state.price}></input>
+                <button type="submit">Submit</button>
+            </form>
+
+        </div>
+    );
+    }
+}
+
+export default AddProducts;
+
+-------------------------------------------------------
+ListProducts.js
+
+import React from "react";
+import ProductService from "../services/ProductService";
+
+
+class  ListProducts extends React.Component{
+  /*  const [ bookCode, setBookCode ] = useState(' ');
+    const [ bookTitle, setBookTitle ] = useState(' ');
+    const [ bookStock, setBookStock ] = useState(' ');
+    const [ bookPrice, setBookPrice ] = useState(' ');
+    const [ dataString, setDataString ] = useState(' ');
+    const [ books, setBooks]=useState([
+        { bookCode:100, bookTitle :"Core Java",bookStock:20, bookPrice:800},
+        { bookCode:123,bookTitle:'Way To US',bookStock:50, bookPrice:5000},
+        { bookCode:124,bookTitle:'Core Java',bookStock:20, bookPrice:800},
+      ]);
+   let index=0;
+*/
+constructor(props) {
+  super(props);
+  this.state = { prods : [] }
+  alert("Array created");
+}
+
+componentDidMount(){
+  alert("passing req");
+     ProductService.getProducts().then((response)=>{
+           this.setState({ prods : response.data});
+     });
+
+   
+     alert (this.state.prods);
+}
+
+render(){
+  return (
+    <div>
+        <h2><center>Product Details</center></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Id</th>
+                    <th>Product Name</th>
+                    <th>Product Stock</th>
+                    <th>Product Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {
+                    this.state.prods.map(prod =>
+                            <tr key={prod.id}>
+                                <td>{prod.id}</td>
+                                <td>{prod.productName}</td>
+                                <td>{prod.productStock}</td>
+                                <td>{prod.price}</td>
+                            </tr>
+                    )
+                }
+            </tbody>
+        </table>
+    </div>
+)
+}
+}
+
+export default ListProducts;
+---------------------------------------------------
+ProductService.js
+
+import axios from 'axios';
+
+const usrUrl="http://localhost:8088/getAll";
+const usrUrl2="http://localhost:8088/addProduct";
+
+class ProductService {
+    getProducts(){
+       return axios.get(usrUrl);
+    }
+
+    addProduct(product){
+        alert("post called from service");
+        return axios.post(usrUrl2,product);
+    }
+}
+
+export default new ProductService();
